@@ -56,10 +56,13 @@
     <Analyzer Include="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\BuildingManager.cs" />
-    <Compile Include="Assets\Scripts\CheckBuildablePlacement.cs" />
     <Compile Include="Assets\QuickOutline\Scripts\Outline.cs" />
+    <Compile Include="Assets\Scripts\BuildingManager.cs" />
     <Compile Include="Assets\Scripts\SelectManager.cs" />
+    <Compile Include="Assets\Scripts\CameraController.cs" />
+    <Compile Include="Assets\Scripts\CheckBuildablePlacement.cs" />
+    <Compile Include="Assets\Scripts\CameraMove.cs" />
+    <Compile Include="Assets\Scripts\CameraControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\QuickOutline\Resources\Shaders\OutlineMask.shader" />

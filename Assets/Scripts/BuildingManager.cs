@@ -5,8 +5,9 @@ using UnityEngine.UI;
 
 public class BuildingManager : MonoBehaviour
 {
+    private SelectManager selectManager;
     public GameObject[] objects;
-    private GameObject pendingObject;
+    public GameObject pendingObject;
 
     private Vector3 pos;
     private RaycastHit hit;
@@ -21,6 +22,7 @@ public class BuildingManager : MonoBehaviour
     public float gridSize;
     bool gridOn = true;
     [SerializeField] private Toggle gridToggle;
+    [SerializeField] private Toggle wallToggle;
 
     private float rotateAmount = 5f;
     //used for showing visually if object can be placed
@@ -31,6 +33,7 @@ public class BuildingManager : MonoBehaviour
     {
         //Must be true at the start
         canPlace = true;
+        selectManager = GameObject.Find("SelectManager").GetComponent<SelectManager>();
     }
     void Update()
     {
@@ -59,19 +62,19 @@ public class BuildingManager : MonoBehaviour
             //Rotate object based on positive/negative inputs from either mouse wheel or E/Q buttons
             if (Input.GetAxis("Mouse ScrollWheel") > 0)
             {
-                rotateObject(true, true);
+                RotateObject(true, true);
             }
             else if(Input.GetAxis("Mouse ScrollWheel") < 0)
             {
-                rotateObject(false, true);
+                RotateObject(false, true);
             }
             if (Input.GetAxis("Rotate") > 0)
             {
-                rotateObject(true, false);
+                RotateObject(true, false);
             }
-            if (Input.GetAxis("Rotate") < 0)
+            else if (Input.GetAxis("Rotate") < 0)
             {
-                rotateObject(false, false);
+                RotateObject(false, false);
             }
         }
     }
@@ -89,6 +92,7 @@ public class BuildingManager : MonoBehaviour
     public void SelectObject(int index)
     {
         pendingObject = Instantiate(objects[index], pos, transform.rotation);
+        selectManager.Select(pendingObject);
     }
     public void PlaceObject()
     {
@@ -117,6 +121,26 @@ public class BuildingManager : MonoBehaviour
         else { gridOn = false; }
     }
 
+    public void ToggleWalls()
+    {
+        float wallTransparency = 1.0f;
+        if (wallToggle.isOn)
+        {
+            wallTransparency = 1.0f;
+        }
+        else { wallTransparency = 0.35f; }
+
+        //gather all objects tagged with "Wall"
+        var walls = GameObject.FindGameObjectsWithTag("Wall");
+        foreach (var wall in walls)
+        {
+            //set material transparency
+            Color wallColor = wall.GetComponent<MeshRenderer>().material.color;
+            wallColor.a = wallTransparency; 
+            wall.GetComponent<MeshRenderer>().material.color = wallColor;
+        }
+    }
+
     float RoundToNearestGrid(float pos)
     {
         /* this method gets the remainder of the position and the grid size after they are divided, 
@@ -131,7 +155,7 @@ public class BuildingManager : MonoBehaviour
         return pos;
     }
 
-    void rotateObject(bool directionUp, bool isMouse)
+    void RotateObject(bool directionUp, bool isMouse)
     {
         float currentRotateAmount = 1;
 
