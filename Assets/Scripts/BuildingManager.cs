@@ -13,9 +13,6 @@ public class BuildingManager : MonoBehaviour
     private RaycastHit hit;
     public bool canPlace = true;
 
-    public int floorIndex = 0;
-    private float floorHeight = 0.0f;
-
     //layerMask where object can be moved and placed (Ground = 3)
     [SerializeField] private LayerMask layerMask;
 
@@ -37,8 +34,6 @@ public class BuildingManager : MonoBehaviour
     }
     void Update()
     {
-        UpdateFloor();
-
         if (pendingObject != null)
         {
             //If grid is on, round position to nearest grid position
@@ -46,11 +41,11 @@ public class BuildingManager : MonoBehaviour
             {
                 //without floorHeight,objects keep moving towards camera, because they are valid building grounds.
                 //This can also be fixed by changing their layerMask during building phase.
-                pendingObject.transform.position = new Vector3(RoundToNearestGrid(pos.x), floorHeight, RoundToNearestGrid(pos.z));
+                pendingObject.transform.position = new Vector3(RoundToNearestGrid(pos.x), pos.y, RoundToNearestGrid(pos.z));
             }
             else
             {
-                pendingObject.transform.position = new Vector3(pos.x, floorHeight, pos.z);
+                pendingObject.transform.position = new Vector3(pos.x, pos.y, pos.z);
             }
 
             UpdateMaterials();
@@ -79,16 +74,6 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    private void UpdateFloor()
-    {
-        //Building has more than one floor, with possible different heights.
-        //If building on top of buildable objects is wanted, then adding a check for buildable layerMask
-        //and fecthing it's height is reguired. This means all buildables would required a height parameter.
-        if (floorIndex == 0)
-        {
-            floorHeight = 0.0f;
-        }
-    }
     public void SelectObject(int index)
     {
         pendingObject = Instantiate(objects[index], pos, transform.rotation);
