@@ -61,8 +61,8 @@
     <Compile Include="Assets\Scripts\SelectManager.cs" />
     <Compile Include="Assets\Scripts\CameraController.cs" />
     <Compile Include="Assets\Scripts\CheckBuildablePlacement.cs" />
-    <Compile Include="Assets\Scripts\CameraMove.cs" />
-    <Compile Include="Assets\Scripts\CameraControl.cs" />
+    <Compile Include="Assets\Scripts\legacy\CameraMove.cs" />
+    <Compile Include="Assets\Scripts\legacy\CameraControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\QuickOutline\Resources\Shaders\OutlineMask.shader" />

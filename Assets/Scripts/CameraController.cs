@@ -22,19 +22,19 @@ public class CameraController : MonoBehaviour
     {
         float xMovement = 0;
         float zMovement = 0;
-        if (Input.GetKey("w") || Input.mousePosition.y >= Screen.height - panBorderThickness)
+        if (Input.GetKey("w") || Input.GetKey("up") || Input.mousePosition.y >= Screen.height - panBorderThickness)
         {
             zMovement += panSpeed * Time.deltaTime;
         }
-        if (Input.GetKey("s") || Input.mousePosition.y <= panBorderThickness)
+        if (Input.GetKey("s") || Input.GetKey("down") || Input.mousePosition.y <= panBorderThickness)
         {
             zMovement -= panSpeed * Time.deltaTime;
         }
-        if (Input.GetKey("d") || Input.mousePosition.x >= Screen.width - panBorderThickness)
+        if (Input.GetKey("d") || Input.GetKey("right") || Input.mousePosition.x >= Screen.width - panBorderThickness)
         {
             xMovement += panSpeed * Time.deltaTime;
         }
-        if (Input.GetKey("a") || Input.mousePosition.x <= panBorderThickness)
+        if (Input.GetKey("a") || Input.GetKey("left") || Input.mousePosition.x <= panBorderThickness)
         {
             xMovement -= panSpeed * Time.deltaTime;
         }

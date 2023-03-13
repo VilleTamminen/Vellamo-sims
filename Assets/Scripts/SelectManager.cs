@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -49,6 +50,7 @@ public class SelectManager : MonoBehaviour
         selectedObject = obj;
         selectUI.SetActive(true);
     }
+
     void Deselect()
     {
         if (selectedObject != null)

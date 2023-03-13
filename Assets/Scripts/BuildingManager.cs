@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,11 +10,12 @@ public class BuildingManager : MonoBehaviour
     public GameObject[] objects;
     public GameObject pendingObject;
 
+    //Position where raycast hits
     private Vector3 pos;
     private RaycastHit hit;
     public bool canPlace = true;
 
-    //layerMask where object can be moved and placed (Ground = 3)
+    //layerMask where object can be moved and placed (Ground = 3, Buildable = 6)
     [SerializeField] private LayerMask layerMask;
 
     public float gridSize;
@@ -77,24 +79,61 @@ public class BuildingManager : MonoBehaviour
     public void SelectObject(int index)
     {
         pendingObject = Instantiate(objects[index], pos, transform.rotation);
+        pendingObject.gameObject.tag = "Untagged";
         selectManager.Select(pendingObject);
     }
     public void PlaceObject()
     {
         //update object material with it's original material
-        pendingObject.GetComponent<MeshRenderer>().material = originalMaterial;
+        if (pendingObject.GetComponent<MeshRenderer>() != null)
+        {
+            pendingObject.GetComponent<MeshRenderer>().material = originalMaterial;
+        }
+        //Give back original tag
+        pendingObject.gameObject.tag = "Buildable";
         originalMaterial = null;
         pendingObject = null;
     }
 
     void FixedUpdate()
     {
+        //Normal raycast. 
+        /* Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+         //Updates position where mouse raycast hits object
+         if (Physics.Raycast(ray, out hit, 1000, layerMask))
+         {
+             pos = hit.point;
+         }
+         */
+
+        //RaycastAll
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        
-        if (Physics.Raycast(ray, out hit, 1000, layerMask))
+        RaycastHit[] HitObjects = Physics.RaycastAll(ray, 1000, layerMask);
+
+        //Get shortest distance raycast hit
+        RaycastHit shortestHit = new RaycastHit();
+        float shortestDist = Mathf.Infinity;
+        bool foundHit = false;
+        for (int i = 0; i < HitObjects.Length; i++)
         {
-            pos = hit.point;
+            //If hit object is on layer 6 (Buildable) then it has to have tag "Buildable". Pending object is Untagged during placement.
+            if ((HitObjects[i].transform.root.tag == "Buildable" && HitObjects[i].transform.root.gameObject.layer == 6) || 
+                (HitObjects[i].transform.root.tag != "Buildable" && HitObjects[i].transform.root.gameObject.layer != 6))
+            {
+                if (Vector3.Distance(Camera.main.transform.position, HitObjects[i].point) < shortestDist)
+                {
+                    shortestDist = Vector3.Distance(Camera.main.transform.position, HitObjects[i].point);
+                    shortestHit = HitObjects[i];
+                    foundHit = true;
+                    Debug.Log("new hit " + shortestDist);
+                }
+            }
         }
+        if (foundHit)
+        {
+            pos = shortestHit.point;
+        }
+
     } 
 
     public void ToggleGrid()
@@ -160,15 +199,18 @@ public class BuildingManager : MonoBehaviour
 
     void UpdateMaterials()
     {
-        //Update materials to visually show if object can be placed
-        if (originalMaterial == null) 
+        if (pendingObject.GetComponent<MeshRenderer>() != null)
         {
-            originalMaterial = pendingObject.GetComponent<MeshRenderer>().material;
+            //Update materials to visually show if object can be placed
+            if (originalMaterial == null)
+            {
+                originalMaterial = pendingObject.GetComponent<MeshRenderer>().material;
+            }
+            if (canPlace)
+            {
+                pendingObject.GetComponent<MeshRenderer>().material = materials[0];
+            }
+            else { pendingObject.GetComponent<MeshRenderer>().material = materials[1]; }
         }
-        if (canPlace)
-        {
-            pendingObject.GetComponent<MeshRenderer>().material = materials[0];
-        }
-        else { pendingObject.GetComponent<MeshRenderer>().material = materials[1]; }
     }
 }
