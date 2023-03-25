@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,7 +80,8 @@ public class BuildingManager : MonoBehaviour
     public void SelectObject(int index)
     {
         pendingObject = Instantiate(objects[index], pos, transform.rotation);
-        pendingObject.gameObject.tag = "Untagged";
+        //Makinbg object untagged allows us to ignore it during raycasting
+       // pendingObject.gameObject.tag = "Untagged";
         selectManager.Select(pendingObject);
     }
     public void PlaceObject()
@@ -90,7 +92,7 @@ public class BuildingManager : MonoBehaviour
             pendingObject.GetComponent<MeshRenderer>().material = originalMaterial;
         }
         //Give back original tag
-        pendingObject.gameObject.tag = "Buildable";
+       // pendingObject.gameObject.tag = "Buildable";
         originalMaterial = null;
         pendingObject = null;
     }
@@ -114,24 +116,36 @@ public class BuildingManager : MonoBehaviour
         RaycastHit shortestHit = new RaycastHit();
         float shortestDist = Mathf.Infinity;
         bool foundHit = false;
-        for (int i = 0; i < HitObjects.Length; i++)
+        if (pendingObject != null)
         {
-            //If hit object is on layer 6 (Buildable) then it has to have tag "Buildable". Pending object is Untagged during placement.
-            if ((HitObjects[i].transform.root.tag == "Buildable" && HitObjects[i].transform.root.gameObject.layer == 6) || 
-                (HitObjects[i].transform.root.tag != "Buildable" && HitObjects[i].transform.root.gameObject.layer != 6))
+            for (int i = 0; i < HitObjects.Length; i++)
             {
-                if (Vector3.Distance(Camera.main.transform.position, HitObjects[i].point) < shortestDist)
+                if (HitObjects[i].transform.root.gameObject == pendingObject.transform.root.gameObject || HitObjects[i].transform.gameObject.tag == "MeasureTool")
                 {
-                    shortestDist = Vector3.Distance(Camera.main.transform.position, HitObjects[i].point);
-                    shortestHit = HitObjects[i];
-                    foundHit = true;
-                    Debug.Log("new hit " + shortestDist);
+                    //Ignore pendingObject and MeasureTool, since it needs its children to be able to move separately.
+                    Debug.Log("hitobject: " + HitObjects[i].transform.root.gameObject + "pending obj: " + pendingObject.transform.root.gameObject);
+                }
+                else
+                {
+                    //If hit object is on layer 6 (Buildable) then it has to have tag "Buildable". Pending object is Untagged during placement.
+                    if ((HitObjects[i].transform.root.tag == "Buildable" && HitObjects[i].transform.root.gameObject.layer == 6) ||
+                        (HitObjects[i].transform.root.tag != "Buildable" && HitObjects[i].transform.root.gameObject.layer != 6))
+                    {
+
+                        if (Vector3.Distance(Camera.main.transform.position, HitObjects[i].point) < shortestDist)
+                        {
+                            shortestDist = Vector3.Distance(Camera.main.transform.position, HitObjects[i].point);
+                            shortestHit = HitObjects[i];
+                            foundHit = true;
+                           // Debug.Log("hitobject: " + HitObjects[i].transform.root.gameObject + "pending obj: " + pendingObject.transform.root.gameObject);
+                        }
+                    }
                 }
             }
-        }
-        if (foundHit)
-        {
-            pos = shortestHit.point;
+            if (foundHit)
+            {
+                pos = shortestHit.point;
+            }
         }
 
     } 
@@ -201,16 +215,34 @@ public class BuildingManager : MonoBehaviour
     {
         if (pendingObject.GetComponent<MeshRenderer>() != null)
         {
-            //Update materials to visually show if object can be placed
+            //Update materials to visually show if object can be placed. Also for children.
             if (originalMaterial == null)
             {
                 originalMaterial = pendingObject.GetComponent<MeshRenderer>().material;
             }
+
+            MeshRenderer[] childMeshRenderes = pendingObject.GetComponentsInChildren<MeshRenderer>();
             if (canPlace)
             {
                 pendingObject.GetComponent<MeshRenderer>().material = materials[0];
+                if (childMeshRenderes.Length > 0)
+                {
+                    foreach (MeshRenderer rend in childMeshRenderes)
+                    {
+                        rend.material= materials[0];
+                    }
+                }
             }
-            else { pendingObject.GetComponent<MeshRenderer>().material = materials[1]; }
+            else { 
+                pendingObject.GetComponent<MeshRenderer>().material = materials[1];
+                if (childMeshRenderes.Length > 0)
+                {
+                    foreach (MeshRenderer rend in childMeshRenderes)
+                    {
+                        rend.material = materials[1];
+                    }
+                }
+            }
         }
     }
 }

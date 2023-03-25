@@ -47,7 +47,14 @@ public class SelectManager : MonoBehaviour
         else { outline.enabled = true; }
 
         objectNameText.text = obj.name;
-        selectedObject = obj;
+        if(obj.transform.root.gameObject.tag != "MeasureTool"){
+            selectedObject = obj.transform.root.gameObject;
+        }
+        else
+        {
+            //measureTool has children that must be moved separately
+            selectedObject = obj;
+        }
         selectUI.SetActive(true);
     }
 
@@ -56,18 +63,39 @@ public class SelectManager : MonoBehaviour
         if (selectedObject != null)
         {
             selectedObject.GetComponent<Outline>().enabled = false;
+            //Turn off Outlines in children
+            Outline[] childOutlines = selectedObject.GetComponentsInChildren<Outline>();
+            if (childOutlines.Length > 0)
+            {
+                foreach (Outline childOutline in childOutlines)
+                {
+                    childOutline.enabled = false;
+                }
+            }
             selectUI.SetActive(false);
+            selectedObject.transform.parent = null;
             selectedObject = null;
         }
     }
 
     public void Move()
     {
-        buildingManager.pendingObject = selectedObject;
+        //This worked until child objects needed to be able to move separately, like in MeasureTool
+       // buildingManager.pendingObject = selectedObject.transform.root.gameObject;
+
+        if (selectedObject.transform.root.gameObject.tag != "MeasureTool")
+        {
+            buildingManager.pendingObject = selectedObject.transform.root.gameObject;
+        }
+        else
+        {
+            //measureTool has children that must be moved separately
+            buildingManager.pendingObject = selectedObject;
+        }
     }
     public void Delete()
     {
-        GameObject objectToDestroy = selectedObject;
+        GameObject objectToDestroy = selectedObject.transform.root.gameObject;
         Deselect();
         Destroy(objectToDestroy);
     }
