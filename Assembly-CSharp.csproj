@@ -59,6 +59,7 @@
     <Compile Include="Assets\QuickOutline\Scripts\Outline.cs" />
     <Compile Include="Assets\Scripts\BuildingManager.cs" />
     <Compile Include="Assets\Scripts\SelectManager.cs" />
+    <Compile Include="Assets\Scripts\SaveGameManager.cs" />
     <Compile Include="Assets\Scripts\MeasureDistance.cs" />
     <Compile Include="Assets\Scripts\CameraController.cs" />
     <Compile Include="Assets\Scripts\CheckBuildablePlacement.cs" />

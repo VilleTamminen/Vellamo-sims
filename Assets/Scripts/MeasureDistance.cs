@@ -14,6 +14,7 @@ public class MeasureDistance : MonoBehaviour
     public Transform point2;
     private float distance = 0;
     public TextMeshPro distanceText;
+    public LineRenderer line;
 
     private void Start()
     {
@@ -62,5 +63,13 @@ public class MeasureDistance : MonoBehaviour
         eulerAngles.x = 0; 
         eulerAngles.z = 0;
         distanceText.transform.rotation = Quaternion.Euler(eulerAngles);
+
+        UpdateLine(point1.position, point2.position);
+    }
+
+    private void UpdateLine(Vector3 point1, Vector3 point2)
+    {
+        line.SetPosition(0, point1);
+        line.SetPosition(1, point2);
     }
 }

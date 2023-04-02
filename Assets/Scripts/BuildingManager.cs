@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -80,8 +83,10 @@ public class BuildingManager : MonoBehaviour
     public void SelectObject(int index)
     {
         pendingObject = Instantiate(objects[index], pos, transform.rotation);
+        //Set correct name without (Clone), so that Save system works with Resources.Load(name)
+        pendingObject.name = objects[index].name;
         //Makinbg object untagged allows us to ignore it during raycasting
-       // pendingObject.gameObject.tag = "Untagged";
+        // pendingObject.gameObject.tag = "Untagged";
         selectManager.Select(pendingObject);
     }
     public void PlaceObject()
@@ -99,7 +104,7 @@ public class BuildingManager : MonoBehaviour
 
     void FixedUpdate()
     {
-        //Normal raycast. 
+        //Normal raycast. Doesn't allow placing objects on top of other Buildables.
         /* Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
          //Updates position where mouse raycast hits object
          if (Physics.Raycast(ray, out hit, 1000, layerMask))
@@ -123,7 +128,7 @@ public class BuildingManager : MonoBehaviour
                 if (HitObjects[i].transform.root.gameObject == pendingObject.transform.root.gameObject || HitObjects[i].transform.gameObject.tag == "MeasureTool")
                 {
                     //Ignore pendingObject and MeasureTool, since it needs its children to be able to move separately.
-                    Debug.Log("hitobject: " + HitObjects[i].transform.root.gameObject + "pending obj: " + pendingObject.transform.root.gameObject);
+                   // Debug.Log("hitobject: " + HitObjects[i].transform.root.gameObject + "pending obj: " + pendingObject.transform.root.gameObject);
                 }
                 else
                 {
@@ -220,7 +225,7 @@ public class BuildingManager : MonoBehaviour
             {
                 originalMaterial = pendingObject.GetComponent<MeshRenderer>().material;
             }
-
+            //Change children's material too if they are Buildables or Walls
             MeshRenderer[] childMeshRenderes = pendingObject.GetComponentsInChildren<MeshRenderer>();
             if (canPlace)
             {
@@ -229,7 +234,10 @@ public class BuildingManager : MonoBehaviour
                 {
                     foreach (MeshRenderer rend in childMeshRenderes)
                     {
-                        rend.material= materials[0];
+                        if (rend.transform.gameObject.tag == "Buildablle" || rend.transform.gameObject.tag == "Wall")
+                        {
+                            rend.material = materials[0];
+                        }
                     }
                 }
             }
@@ -239,10 +247,14 @@ public class BuildingManager : MonoBehaviour
                 {
                     foreach (MeshRenderer rend in childMeshRenderes)
                     {
-                        rend.material = materials[1];
+                        if (rend.transform.gameObject.tag == "Buildablle" || rend.transform.gameObject.tag == "Wall")
+                        {
+                            rend.material = materials[1];
+                        }
                     }
                 }
             }
         }
     }
+
 }
