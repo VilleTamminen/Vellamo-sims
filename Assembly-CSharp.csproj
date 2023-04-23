@@ -63,8 +63,10 @@
     <Compile Include="Assets\Scripts\MeasureDistance.cs" />
     <Compile Include="Assets\Scripts\CameraController.cs" />
     <Compile Include="Assets\Scripts\CheckBuildablePlacement.cs" />
+    <Compile Include="Assets\Scripts\UIManager.cs" />
     <Compile Include="Assets\Scripts\legacy\CameraMove.cs" />
     <Compile Include="Assets\Scripts\legacy\CameraControl.cs" />
+    <Compile Include="Assets\Scripts\SaveGameButton.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

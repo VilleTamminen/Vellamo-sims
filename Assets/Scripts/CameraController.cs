@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 //Tutorial from Brackeys: https://www.youtube.com/watch?v=cfjLQrMGEb4 
 //Works with perspective camera
@@ -12,33 +13,65 @@ public class CameraController : MonoBehaviour
     public Vector2 panLimit; //make borders how far pan can go. Must be recalculated when Vellamo map size is ready
     public float cameraRotateSpeed = 10f;
 
+    //Allows moving camera by bringin mouse cursor close to screen borders.
+    private bool mouseMovement = true; 
+    [SerializeField] private Toggle mouseMovementToggle; 
+
     private SelectManager selectManager;
 
-    private void Start()
+    private void Awake()
     {
-        selectManager = GameObject.Find("SelectManager").GetComponent<SelectManager>();
+        selectManager = SelectManager.Instance;
+            //GameObject.Find("SelectManager").GetComponent<SelectManager>();
+
+        if(mouseMovementToggle == null && GameObject.Find("MouseMovementToggle").GetComponent<Toggle>())
+        {
+            mouseMovementToggle = GameObject.Find("MouseMovementToggle").GetComponent<Toggle>();
+        }
     }
+
     void Update()
     {
         float xMovement = 0;
         float zMovement = 0;
-        if (Input.GetKey("w") || Input.GetKey("up") || Input.mousePosition.y >= Screen.height - panBorderThickness)
+        if (mouseMovement == true)
         {
-            zMovement += panSpeed * Time.deltaTime;
+            if (Input.GetKey("w") || Input.GetKey("up") || Input.mousePosition.y >= Screen.height - panBorderThickness)
+            {
+                zMovement += panSpeed * Time.deltaTime;
+            }
+            if (Input.GetKey("s") || Input.GetKey("down") || Input.mousePosition.y <= panBorderThickness)
+            {
+                zMovement -= panSpeed * Time.deltaTime;
+            }
+            if (Input.GetKey("d") || Input.GetKey("right") || Input.mousePosition.x >= Screen.width - panBorderThickness)
+            {
+                xMovement += panSpeed * Time.deltaTime;
+            }
+            if (Input.GetKey("a") || Input.GetKey("left") || Input.mousePosition.x <= panBorderThickness)
+            {
+                xMovement -= panSpeed * Time.deltaTime;
+            }
         }
-        if (Input.GetKey("s") || Input.GetKey("down") || Input.mousePosition.y <= panBorderThickness)
+        else
         {
-            zMovement -= panSpeed * Time.deltaTime;
+            if (Input.GetKey("w") || Input.GetKey("up"))
+            {
+                zMovement += panSpeed * Time.deltaTime;
+            }
+            if (Input.GetKey("s") || Input.GetKey("down"))
+            {
+                zMovement -= panSpeed * Time.deltaTime;
+            }
+            if (Input.GetKey("d") || Input.GetKey("right"))
+            {
+                xMovement += panSpeed * Time.deltaTime;
+            }
+            if (Input.GetKey("a") || Input.GetKey("left"))
+            {
+                xMovement -= panSpeed * Time.deltaTime;
+            }
         }
-        if (Input.GetKey("d") || Input.GetKey("right") || Input.mousePosition.x >= Screen.width - panBorderThickness)
-        {
-            xMovement += panSpeed * Time.deltaTime;
-        }
-        if (Input.GetKey("a") || Input.GetKey("left") || Input.mousePosition.x <= panBorderThickness)
-        {
-            xMovement -= panSpeed * Time.deltaTime;
-        }
-     
         transform.Translate(new Vector3(xMovement, 0,0) * panSpeed, Space.Self);
         transform.Translate(new Vector3(0,0, zMovement) * panSpeed, Space.Self);
          CheckPanLimit();
@@ -70,5 +103,14 @@ public class CameraController : MonoBehaviour
         pos.x = Mathf.Clamp(pos.x, -panLimit.x, panLimit.x);
         pos.z = Mathf.Clamp(pos.z, -panLimit.y, panLimit.y);
         transform.position = pos;
+    }
+
+    public void ToggleMouseMovement()
+    {
+        if (mouseMovementToggle.isOn)
+        {
+            mouseMovement = true;
+        }
+        else { mouseMovement = false; }
     }
 }

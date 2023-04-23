@@ -11,10 +11,12 @@ public class CheckBuildablePlacement : MonoBehaviour
     //layers that prevent building placement. 6 = Buildable, 7 = Wall
     public LayerMask[] obstacleLayers = { 6, 7 };
     public GameObject[] measurePoints = new GameObject[4];
+    public bool hasMeasurePoints = false;
 
     void Start()
     {
-        buildingManager = GameObject.Find("BuildingManager").GetComponent<BuildingManager>();
+        buildingManager = BuildingManager.Instance.GetComponent<BuildingManager>();
+            //GameObject.Find("BuildingManager").GetComponent<BuildingManager>();
         if(buildingManager == null)
         {
             Debug.LogError("BuildingManager is missing from scene!!!");
@@ -41,14 +43,22 @@ public class CheckBuildablePlacement : MonoBehaviour
 
     private void SetMeasurePoints()
     {
-        //Set measurePoint and then hide them. Used by selectManager to visualize distance to other objects.
-        measurePoints[0] = transform.root.Find("measurePoint1").gameObject;
-        measurePoints[1] = transform.root.Find("measurePoint2").gameObject;
-        measurePoints[2] = transform.root.Find("measurePoint3").gameObject;
-        measurePoints[3] = transform.root.Find("measurePoint4").gameObject;
-        foreach (GameObject obj in measurePoints)
+        //If measurePoint exists, then set and then hide them. Used by selectManager to visualize distance to other objects.
+        if (transform.root.Find("measurePoint1") != null)
         {
-            obj.SetActive(false);
+            hasMeasurePoints = true;
+            measurePoints[0] = transform.root.Find("measurePoint1").gameObject;
+            measurePoints[1] = transform.root.Find("measurePoint2").gameObject;
+            measurePoints[2] = transform.root.Find("measurePoint3").gameObject;
+            measurePoints[3] = transform.root.Find("measurePoint4").gameObject;
+            foreach (GameObject obj in measurePoints)
+            {
+                obj.SetActive(false);
+            }
         }
-    }
+        else
+        {
+            hasMeasurePoints = false;
+        }
+    } 
 }

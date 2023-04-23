@@ -12,6 +12,7 @@ public class BuildingManager : MonoBehaviour
 {
     private SelectManager selectManager;
     public GameObject[] objects;
+    //if pending object is not null, then that object is constantly moved with using mouse position on screen raycast.
     public GameObject pendingObject;
 
     //Position where raycast hits
@@ -32,11 +33,24 @@ public class BuildingManager : MonoBehaviour
     [SerializeField] private Material[] materials;
     private Material originalMaterial;
 
+    private static BuildingManager instance;
+    public static BuildingManager Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = GameObject.FindObjectOfType<BuildingManager>();
+            }
+            return instance;
+        }
+    }
+
     void Start()
     {
         //Must be true at the start
         canPlace = true;
-        selectManager = GameObject.Find("SelectManager").GetComponent<SelectManager>();
+        selectManager = SelectManager.Instance;
     }
     void Update()
     {
@@ -53,19 +67,18 @@ public class BuildingManager : MonoBehaviour
             {
                 pendingObject.transform.position = new Vector3(pos.x, pos.y, pos.z);
             }
-
             UpdateMaterials();
+
             if (Input.GetMouseButtonDown(0) && canPlace)
             {
                 PlaceObject();
             }
-
             //Rotate object based on positive/negative inputs from either mouse wheel or E/Q buttons
             if (Input.GetAxis("Mouse ScrollWheel") > 0)
             {
                 RotateObject(true, true);
             }
-            else if(Input.GetAxis("Mouse ScrollWheel") < 0)
+            else if (Input.GetAxis("Mouse ScrollWheel") < 0)
             {
                 RotateObject(false, true);
             }
@@ -80,6 +93,9 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Buttons from ObjectPanel use this to spawn objects with index.
+    /// </summary>
     public void SelectObject(int index)
     {
         pendingObject = Instantiate(objects[index], pos, transform.rotation);
@@ -87,17 +103,33 @@ public class BuildingManager : MonoBehaviour
         pendingObject.name = objects[index].name;
         //Makinbg object untagged allows us to ignore it during raycasting
         // pendingObject.gameObject.tag = "Untagged";
-        selectManager.Select(pendingObject);
+        selectManager.Select(pendingObject, false);
     }
+
+    /// <summary>
+    /// Only changes object materials.
+    /// </summary>
     public void PlaceObject()
     {
-        //update object material with it's original material
+        //update object material and it's children material with the original material
         if (pendingObject.GetComponent<MeshRenderer>() != null)
         {
             pendingObject.GetComponent<MeshRenderer>().material = originalMaterial;
         }
+        MeshRenderer[] childMeshRenderers = pendingObject.GetComponentsInChildren<MeshRenderer>();
+        if (childMeshRenderers.Length > 0)
+        {
+            foreach (MeshRenderer rend in childMeshRenderers)
+            {
+                if (rend.transform.gameObject.tag == "Buildable" || rend.transform.gameObject.tag == "Wall")
+                {
+                    rend.material = originalMaterial;
+                }
+            }
+        } 
+
         //Give back original tag
-       // pendingObject.gameObject.tag = "Buildable";
+        // pendingObject.gameObject.tag = "Buildable";
         originalMaterial = null;
         pendingObject = null;
     }
@@ -128,7 +160,7 @@ public class BuildingManager : MonoBehaviour
                 if (HitObjects[i].transform.root.gameObject == pendingObject.transform.root.gameObject || HitObjects[i].transform.gameObject.tag == "MeasureTool")
                 {
                     //Ignore pendingObject and MeasureTool, since it needs its children to be able to move separately.
-                   // Debug.Log("hitobject: " + HitObjects[i].transform.root.gameObject + "pending obj: " + pendingObject.transform.root.gameObject);
+                    // Debug.Log("hitobject: " + HitObjects[i].transform.root.gameObject + "pending obj: " + pendingObject.transform.root.gameObject);
                 }
                 else
                 {
@@ -142,7 +174,7 @@ public class BuildingManager : MonoBehaviour
                             shortestDist = Vector3.Distance(Camera.main.transform.position, HitObjects[i].point);
                             shortestHit = HitObjects[i];
                             foundHit = true;
-                           // Debug.Log("hitobject: " + HitObjects[i].transform.root.gameObject + "pending obj: " + pendingObject.transform.root.gameObject);
+                            // Debug.Log("hitobject: " + HitObjects[i].transform.root.gameObject + "pending obj: " + pendingObject.transform.root.gameObject);
                         }
                     }
                 }
@@ -153,11 +185,11 @@ public class BuildingManager : MonoBehaviour
             }
         }
 
-    } 
+    }
 
     public void ToggleGrid()
     {
-        if(gridToggle.isOn)
+        if (gridToggle.isOn)
         {
             gridOn = true;
         }
@@ -179,7 +211,7 @@ public class BuildingManager : MonoBehaviour
         {
             //set material transparency
             Color wallColor = wall.GetComponent<MeshRenderer>().material.color;
-            wallColor.a = wallTransparency; 
+            wallColor.a = wallTransparency;
             wall.GetComponent<MeshRenderer>().material.color = wallColor;
         }
     }
@@ -191,7 +223,7 @@ public class BuildingManager : MonoBehaviour
          * upwards instead so that it rounds to the nearest value, not just rounding down.*/
         float xDiff = pos % gridSize;
         pos -= xDiff;
-        if(xDiff > (gridSize / 2))
+        if (xDiff > (gridSize / 2))
         {
             pos += gridSize;
         }
@@ -200,54 +232,77 @@ public class BuildingManager : MonoBehaviour
 
     void RotateObject(bool directionUp, bool isMouse)
     {
-        float currentRotateAmount = 1;
-
-        if (isMouse == false)
+        //This second check for pendingObject prevents errors somehow.
+        if (pendingObject != null)
         {
-            //mouse works fine with default rotate amount, but E/Q buttons spin it too fast (they need lower speed)
-            currentRotateAmount = 1;
-        }
-        else { currentRotateAmount = rotateAmount; }
+            float currentRotateAmount = 1;
 
-        if (directionUp == true)
-        {
-            pendingObject.transform.Rotate(Vector3.up, currentRotateAmount);
+            if (isMouse == false)
+            {
+                //mouse works fine with default rotate amount, but E/Q buttons spin it too fast (they need lower speed)
+                currentRotateAmount = 1;
+            }
+            else { currentRotateAmount = rotateAmount; }
+
+            if (directionUp == true)
+            {
+                pendingObject.transform.Rotate(Vector3.up, currentRotateAmount);
+            }
+            else { pendingObject.transform.Rotate(Vector3.down, currentRotateAmount); }
         }
-        else { pendingObject.transform.Rotate(Vector3.down, currentRotateAmount); }
     }
 
     void UpdateMaterials()
     {
-        if (pendingObject.GetComponent<MeshRenderer>() != null)
+        bool hasParentMaterial = false;
+        if (pendingObject.GetComponent<MeshRenderer>() != null || pendingObject.GetComponentInChildren<MeshRenderer>() != null)
         {
             //Update materials to visually show if object can be placed. Also for children.
-            if (originalMaterial == null)
+            if (pendingObject.GetComponent<MeshRenderer>() != null && originalMaterial == null)
             {
                 originalMaterial = pendingObject.GetComponent<MeshRenderer>().material;
+                hasParentMaterial = true;
+            }
+            else if (pendingObject.GetComponentInChildren<MeshRenderer>() != null && originalMaterial == null)
+            {
+                originalMaterial = pendingObject.GetComponentInChildren<MeshRenderer>().material;
+                hasParentMaterial = false;
             }
             //Change children's material too if they are Buildables or Walls
-            MeshRenderer[] childMeshRenderes = pendingObject.GetComponentsInChildren<MeshRenderer>();
+            MeshRenderer[] childMeshRenderers = pendingObject.GetComponentsInChildren<MeshRenderer>();
             if (canPlace)
             {
-                pendingObject.GetComponent<MeshRenderer>().material = materials[0];
-                if (childMeshRenderes.Length > 0)
+                if(hasParentMaterial)
                 {
-                    foreach (MeshRenderer rend in childMeshRenderes)
+                    pendingObject.GetComponent<MeshRenderer>().material = materials[0];
+                }
+
+                if (childMeshRenderers.Length > 0)
+                {
+                    foreach (MeshRenderer rend in childMeshRenderers)
                     {
-                        if (rend.transform.gameObject.tag == "Buildablle" || rend.transform.gameObject.tag == "Wall")
+                        if (rend.transform.gameObject.tag == "Buildable" || rend.transform.gameObject.tag == "Wall")
                         {
                             rend.material = materials[0];
                         }
                     }
                 }
             }
-            else { 
-                pendingObject.GetComponent<MeshRenderer>().material = materials[1];
-                if (childMeshRenderes.Length > 0)
+            else
+            {
+                if (hasParentMaterial)
                 {
-                    foreach (MeshRenderer rend in childMeshRenderes)
+                    pendingObject.GetComponent<MeshRenderer>().material = materials[1];
+                }
+                else
+                {
+                    pendingObject.GetComponentInChildren<MeshRenderer>().material = materials[1];
+                }
+                if (childMeshRenderers.Length > 0)
+                {
+                    foreach (MeshRenderer rend in childMeshRenderers)
                     {
-                        if (rend.transform.gameObject.tag == "Buildablle" || rend.transform.gameObject.tag == "Wall")
+                        if (rend.transform.gameObject.tag == "Buildable" || rend.transform.gameObject.tag == "Wall")
                         {
                             rend.material = materials[1];
                         }
