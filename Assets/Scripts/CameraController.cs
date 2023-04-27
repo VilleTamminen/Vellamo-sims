@@ -14,7 +14,7 @@ public class CameraController : MonoBehaviour
     public float cameraRotateSpeed = 10f;
 
     //Allows moving camera by bringin mouse cursor close to screen borders.
-    private bool mouseMovement = true; 
+    private bool mouseMovement = false; 
     [SerializeField] private Toggle mouseMovementToggle; 
 
     private SelectManager selectManager;

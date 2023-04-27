@@ -309,6 +309,7 @@
 "Assets/Scripts/legacy/CameraControl.cs"
 "Assets/Scripts/legacy/CameraMove.cs"
 "Assets/Scripts/MeasureDistance.cs"
+"Assets/Scripts/SaveGameButton.cs"
 "Assets/Scripts/SaveGameManager.cs"
 "Assets/Scripts/SelectManager.cs"
 "Assets/Scripts/UIManager.cs"

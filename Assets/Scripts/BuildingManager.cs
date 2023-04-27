@@ -24,7 +24,7 @@ public class BuildingManager : MonoBehaviour
     [SerializeField] private LayerMask layerMask;
 
     public float gridSize;
-    bool gridOn = true;
+    bool gridOn = false;
     [SerializeField] private Toggle gridToggle;
     [SerializeField] private Toggle wallToggle;
 
@@ -56,6 +56,7 @@ public class BuildingManager : MonoBehaviour
     {
         if (pendingObject != null)
         {
+            SelectManager.Instance.isMoving = true;
             //If grid is on, round position to nearest grid position
             if (gridOn)
             {
@@ -98,12 +99,12 @@ public class BuildingManager : MonoBehaviour
     /// </summary>
     public void SelectObject(int index)
     {
-        pendingObject = Instantiate(objects[index], pos, transform.rotation);
+        pendingObject = Instantiate(objects[index], pos, transform.rotation); 
         //Set correct name without (Clone), so that Save system works with Resources.Load(name)
         pendingObject.name = objects[index].name;
         //Makinbg object untagged allows us to ignore it during raycasting
         // pendingObject.gameObject.tag = "Untagged";
-        selectManager.Select(pendingObject, false);
+        selectManager.Select(pendingObject);
     }
 
     /// <summary>
@@ -126,10 +127,11 @@ public class BuildingManager : MonoBehaviour
                     rend.material = originalMaterial;
                 }
             }
-        } 
+        }
 
         //Give back original tag
         // pendingObject.gameObject.tag = "Buildable";
+        SelectManager.Instance.isMoving = false;
         originalMaterial = null;
         pendingObject = null;
     }
@@ -155,6 +157,7 @@ public class BuildingManager : MonoBehaviour
         bool foundHit = false;
         if (pendingObject != null)
         {
+            SelectManager.Instance.isMoving = true;
             for (int i = 0; i < HitObjects.Length; i++)
             {
                 if (HitObjects[i].transform.root.gameObject == pendingObject.transform.root.gameObject || HitObjects[i].transform.gameObject.tag == "MeasureTool")

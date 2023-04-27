@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 //Bugs: Last selected object's customized scale can affect newly instantiated object scale.
@@ -14,8 +15,8 @@ public class SelectManager : MonoBehaviour
     public TMP_Text objectNameText;
     public GameObject selectUI; //SelectedObjectPanel
     private BuildingManager buildingManager;
-    private Transform firstPosition; //includes position and rotation
-    public bool firstPositionIsSet = false;
+
+    public bool isMoving = false;
 
     //Input fields allow custom scales for objects
     public TMP_InputField XScaleInput;
@@ -86,7 +87,8 @@ public class SelectManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        //IsPointerOverGameObject() == false means mouse is not over UI elements
+        if (Input.GetMouseButtonDown(0) && EventSystem.current.IsPointerOverGameObject() == false)
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -94,7 +96,7 @@ public class SelectManager : MonoBehaviour
             {
                 if (hit.collider.gameObject.layer == 6)
                 {
-                    Select(hit.collider.gameObject.transform.root.gameObject, true);
+                    Select(hit.collider.gameObject.transform.root.gameObject);
                 }
             }
         }
@@ -109,7 +111,7 @@ public class SelectManager : MonoBehaviour
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="objectHasBeenPlacedBefore">This bool is used to determinate if object was selected from the scene or if it was spawned with buildingManager</param>
-    public void Select(GameObject obj, bool objectHasBeenPlacedBefore)
+    public void Select(GameObject obj)
     {
         if (obj == selectedObject) { return; }
         if (selectedObject != null) { Deselect(); }
@@ -127,18 +129,6 @@ public class SelectManager : MonoBehaviour
         {
             //measureTool has children that must be moved separately
             selectedObject = obj;
-        }
-
-        if (objectHasBeenPlacedBefore == true && selectedObject != null)
-        {
-            firstPosition = selectedObject.transform;
-          //  firstPosition.transform.position = selectedObject.transform.position;
-          //  firstPosition.transform.rotation = selectedObject.transform.rotation;
-            firstPositionIsSet = true;
-        }
-        else
-        {
-            firstPositionIsSet = false;
         }
 
         //Hide scale fields when using measure tool
@@ -174,7 +164,7 @@ public class SelectManager : MonoBehaviour
 
     public void Deselect()
     {
-        if (selectedObject != null)
+        if (selectedObject != null && isMoving == false)
         {
             selectedObject.GetComponent<Outline>().enabled = false;
             //Turn off Outlines in children
@@ -203,17 +193,16 @@ public class SelectManager : MonoBehaviour
             ZScaleInput.text = "";
 
             //Place to first position if moving is still happening
-            if (buildingManager.pendingObject != null && firstPositionIsSet == true)
+         /*   if (buildingManager.pendingObject != null)
             {
                 //Placing object in buildingManager makes pendingObject null.
                 buildingManager.PlaceObject();
-                selectedObject.transform.position = firstPosition.position;
-                selectedObject.transform.rotation = firstPosition.rotation;
-            }
-            firstPositionIsSet = false;
+            } */
+
 
             selectedObject = null;
         }
+
     }
 
     public void Move()
