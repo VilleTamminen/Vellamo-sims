@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 //Tutorial from Brackeys: https://www.youtube.com/watch?v=cfjLQrMGEb4 
-//Works with perspective camera
+//Works with perspective camera.
 //Place on empty parent object and make Camera child object = transform.Translate() movement ignores rotation when turning camera.
 public class CameraController : MonoBehaviour
 {
@@ -13,7 +13,7 @@ public class CameraController : MonoBehaviour
     public Vector2 panLimit; //make borders how far pan can go. Must be recalculated when Vellamo map size is ready
     public float cameraRotateSpeed = 10f;
 
-    //Allows moving camera by bringin mouse cursor close to screen borders.
+    //Allows moving camera by bringing mouse cursor close to screen borders.
     private bool mouseMovement = false; 
     [SerializeField] private Toggle mouseMovementToggle; 
 
@@ -34,6 +34,7 @@ public class CameraController : MonoBehaviour
     {
         float xMovement = 0;
         float zMovement = 0;
+        //Read user inputs and get movement amount
         if (mouseMovement == true)
         {
             if (Input.GetKey("w") || Input.GetKey("up") || Input.mousePosition.y >= Screen.height - panBorderThickness)
@@ -72,6 +73,7 @@ public class CameraController : MonoBehaviour
                 xMovement -= panSpeed * Time.deltaTime;
             }
         }
+        //Move camera
         transform.Translate(new Vector3(xMovement, 0,0) * panSpeed, Space.Self);
         transform.Translate(new Vector3(0,0, zMovement) * panSpeed, Space.Self);
          CheckPanLimit();
@@ -96,7 +98,9 @@ public class CameraController : MonoBehaviour
 
     }
 
-    //Doesn't allow camera to exit area panLimit area
+    /// <summary>
+    /// Doesn't allow camera to exit area panLimit area. Y = Z-axis.
+    /// </summary>
     void CheckPanLimit()
     {
         Vector3 pos = transform.position;
@@ -105,6 +109,9 @@ public class CameraController : MonoBehaviour
         transform.position = pos;
     }
 
+    /// <summary>
+    /// Mouse movement allows moving camera by taking cursor to screen borders.
+    /// </summary>
     public void ToggleMouseMovement()
     {
         if (mouseMovementToggle.isOn)

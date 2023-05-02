@@ -8,6 +8,9 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Responsible for finding correct spot to build and place object.
+/// </summary>
 public class BuildingManager : MonoBehaviour
 {
     private SelectManager selectManager;
@@ -99,16 +102,19 @@ public class BuildingManager : MonoBehaviour
     /// </summary>
     public void SelectObject(int index)
     {
-        pendingObject = Instantiate(objects[index], pos, transform.rotation); 
-        //Set correct name without (Clone), so that Save system works with Resources.Load(name)
-        pendingObject.name = objects[index].name;
-        //Makinbg object untagged allows us to ignore it during raycasting
-        // pendingObject.gameObject.tag = "Untagged";
-        selectManager.Select(pendingObject);
+        if (index <= objects.Length && objects[index] != null)
+        {
+            pendingObject = Instantiate(objects[index], pos, transform.rotation);
+            //Set correct name without (Clone), so that Save system works with Resources.Load(name)
+            pendingObject.name = objects[index].name;
+            //Makinbg object untagged allows us to ignore it during raycasting
+            // pendingObject.gameObject.tag = "Untagged";
+            selectManager.Select(pendingObject);
+        }
     }
 
     /// <summary>
-    /// Only changes object materials.
+    /// Only changes object materials back to it's original material.
     /// </summary>
     public void PlaceObject()
     {
@@ -199,6 +205,9 @@ public class BuildingManager : MonoBehaviour
         else { gridOn = false; }
     }
 
+    /// <summary>
+    /// Obsolete. No need for hiding walls, since project only has one room to play inside.
+    /// </summary>
     public void ToggleWalls()
     {
         float wallTransparency = 1.0f;
@@ -255,6 +264,9 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Swaps object material between green = can place material and red = can't place material.
+    /// </summary>
     void UpdateMaterials()
     {
         bool hasParentMaterial = false;

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
@@ -11,12 +12,21 @@ public class UIManager : MonoBehaviour
     public Button QuitButton;
     public Button ControlsPanelButtenOpen;
     public Button ControlsPanelButtenClose;
+   // public Toggle BlueprintToggle; 
 
     public GameObject MenuPanel;
     public GameObject ObjectPanel;
     public GameObject QuitPanel;
     public GameObject ControlsPanel;
+    public GameObject FloorBlueprint;
 
+    public List<GameObject> ObjectButtons;
+    public GameObject contentParent;
+
+    private void Awake()
+    {
+        FillObjectPanelButtonsInfo();
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -122,10 +132,49 @@ public class UIManager : MonoBehaviour
             ControlsPanel.SetActive(true);
         }
     }
+    public void ToggleBlueprint()
+    {
+        //Show blueprint for floor plan
+        if (FloorBlueprint.activeSelf == true)
+        {
+            FloorBlueprint.SetActive(false);
+        }
+        else
+        {
+            FloorBlueprint.SetActive(true);
+        }
+    }
 
     public void QuitGame()
     {
         Application.Quit();
     }
 
+    /// <summary>
+    /// Fill object buttons with corresponding names from BuildingManager objects array
+    /// </summary>
+    private void FillObjectPanelButtonsInfo()
+    {
+        //Get child buttons
+        foreach(Transform child in contentParent.transform)
+        {
+            ObjectButtons.Add(child.gameObject);
+        }
+        //Assign button info
+        for(int i = 0; i < BuildingManager.Instance.objects.Length; i++)
+        {
+            //  ObjectButtons[i].GetComponent<Button>().image = 
+            ObjectButtons[i].GetComponentInChildren<TMP_Text>().text = BuildingManager.Instance.objects[i].name;
+            ObjectButtons[i].GetComponentInChildren<TMP_Text>().fontSize = 22;
+        }
+    }
+
+    /// <summary>
+    /// Sort object names with given prompt
+    /// </summary>
+    /// <param name="prompt"></param>
+    public void SortObjectPanel(string prompt)
+    {
+
+    }
 }

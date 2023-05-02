@@ -8,6 +8,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using TMPro;
 using System.Runtime.Serialization;
 using System.IO.Pipes;
+using System.Threading;
+using System.Globalization;
 
 //SAVE SYSTEM. GameObject's name and Transform values must be saved.
 //Objects are loaded with Resources.Load using their name, and then given correct Transform values.
@@ -56,48 +58,15 @@ public class SaveGameManager : MonoBehaviour
             newSaveGameButton.GetComponent<Button>().onClick.AddListener(() => SelectSaveGame(fileName, localCopyOfSaveGameCount));
             i++;
         }
+        //Clear culture cache so that DateTime.Now has correct hours
+        System.Globalization.CultureInfo.CurrentCulture.ClearCachedData();
         UpdateSaveGameButtons();
     }
-    /*
-    public void SaveJson()
-    {
-        string path = Application.persistentDataPath + "/testSave2.json";
-        FileStream stream = new FileStream(path, FileMode.Create);
 
-        //COLLECT SAVE DATA
-        //Right now CheckBuildablePlacement is the only script that every buildable object has, so it is used to find all buildables.
-        CheckBuildablePlacement[] saveObjects = FindObjectsOfType<CheckBuildablePlacement>();
-        List<GameObject> saveObjectRoots = new List<GameObject>();
-
-        var sb = new StringBuilder();
-        foreach (CheckBuildablePlacement obj in saveObjects)
-        {
-            Debug.Log(obj.transform.root.gameObject.name);
-            GameObject rootObj = obj.transform.root.gameObject;
-            SaveData data = new SaveData();
-
-            data.name = rootObj.name;
-            data.posX = rootObj.transform.position.x;
-            data.posY = rootObj.transform.position.y;
-            data.posZ = rootObj.transform.position.z;
-            data.rotX = rootObj.transform.rotation.x;
-            data.rotY = rootObj.transform.rotation.y;
-            data.rotZ = rootObj.transform.rotation.z;
-            data.scaleX = rootObj.transform.localScale.x;
-            data.scaleY = rootObj.transform.localScale.z;
-            data.scaleZ = rootObj.transform.localScale.x;
-
-            string json = JsonUtility.ToJson(data, true);
-            Debug.Log("json: " + json.ToString());
-            sb.AppendLine(json);
-        }
-        using (StreamWriter writer = new StreamWriter(stream))
-        {
-            writer.Write(sb);
-        }
-        stream.Close();    
-    } */
-
+    /// <summary>
+    /// Saves objects location, scale and current timestamp to given ".save" file.
+    /// </summary>
+    /// <param name="saveFile"></param>
     public void SaveBinary(string saveFile)
     {
         //Check if Saves folder exists
@@ -147,9 +116,12 @@ public class SaveGameManager : MonoBehaviour
         stream.Close();
     }
 
+    /// <summary>
+    /// Loads save from given file. Deletes all buildable objects first and then instantiates prefabs. File must be ".save" type.
+    /// </summary>
+    /// <param name="loadFile"></param>
     public void LoadBinary(string loadFile)
     {
-        // string path = Application.persistentDataPath + "/testSave1.save";
         string path = Application.persistentDataPath + "/Saves/" + loadFile;
 
         if (File.Exists(path))
@@ -189,6 +161,22 @@ public class SaveGameManager : MonoBehaviour
                         if (spawnObj.GetComponent<Outline>() != null) { spawnObj.GetComponent<Outline>().enabled = false; }
                         if (spawnObj.GetComponentInChildren<Outline>() != null) { spawnObj.GetComponentInChildren<Outline>().enabled = false; }
                     }
+                    else if(Resources.Load("Prefabs/" + saveData.name.ToString().Trim())){
+                        //Trims whitespaces from start and end of name
+                        string savedataName = saveData.name.ToString().Trim();
+                        //INSTANTIATE GAMEOBJECT'S NAME AND TRANSFORM WITH DATA
+                        GameObject spawnObj = Instantiate(Resources.Load("Prefabs/" + savedataName) as GameObject);
+                        spawnObj.name = Resources.Load("Prefabs/" + savedataName).name;
+                        spawnObj.transform.position = new Vector3(saveData.posX, saveData.posY, saveData.posZ);
+                        Vector3 eulerAngles = new Vector3(saveData.rotX, saveData.rotY, saveData.rotZ);
+                        spawnObj.transform.localRotation = Quaternion.Euler(eulerAngles);
+                        Vector3 newScale = new Vector3(saveData.scaleX, saveData.scaleY, saveData.scaleZ);
+                        spawnObj.transform.localScale = newScale;
+
+                        //Set Outlines inactive
+                        if (spawnObj.GetComponent<Outline>() != null) { spawnObj.GetComponent<Outline>().enabled = false; }
+                        if (spawnObj.GetComponentInChildren<Outline>() != null) { spawnObj.GetComponentInChildren<Outline>().enabled = false; }
+                    }
                     else
                     {
                         Debug.LogError("Prefab resource asset does not exists with name " + saveData.name);
@@ -202,6 +190,10 @@ public class SaveGameManager : MonoBehaviour
             Debug.LogError("Save file not found in " + path);
         }
     }
+
+    /// <summary>
+    /// Deletes currently selected save file.
+    /// </summary>
     public void DeleteSave()
     {
         //Deletes currently selected save with saveGameId
@@ -254,6 +246,10 @@ public class SaveGameManager : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// Save button uses this.
+    /// </summary>
     public void SaveGame()
     {
         // string saveFile = "save" + saveGameId.ToString() + ".save";
@@ -261,6 +257,9 @@ public class SaveGameManager : MonoBehaviour
         // UpdateSaveGameContent();
         UpdateSaveGameButtons();
     }
+    /// <summary>
+    /// Load button uses this.
+    /// </summary>
     public void LoadGame()
     {
         //Deselect any selected objects
@@ -272,6 +271,10 @@ public class SaveGameManager : MonoBehaviour
         // UpdateSaveGameContent();
         UpdateSaveGameButtons();
     }
+
+    /// <summary>
+    /// Obsolete. This project has predeterminated amount of saves. No need to craete new ones.
+    /// </summary>
     public void NewGame()
     {
         //Add new game 
@@ -283,9 +286,11 @@ public class SaveGameManager : MonoBehaviour
         saveGameButtons.Add(newSaveGameButton);
     }
 
+    /// <summary>
+    /// Obsolete.
+    /// </summary>
     private void UpdateSaveGameCount()
     {
-        //not used for now!!!
         saveGameCount = 0;
         var fileInfo = new DirectoryInfo(Application.persistentDataPath + "/Saves").GetFiles();
         foreach (FileInfo file in fileInfo)
@@ -323,7 +328,7 @@ public class SaveGameManager : MonoBehaviour
                     else
                     {
                         AllData allData = formatter.Deserialize(stream) as AllData;
-                        saveGameButton.GetComponentInChildren<TMP_Text>().text = file.Name + "\n" + allData.timestamp.ToString("dd/MM/yyyy");
+                        saveGameButton.GetComponentInChildren<TMP_Text>().text = Path.GetFileNameWithoutExtension(file.Name) + "\n" + allData.timestamp.ToString("dd/MM/yyyy HH:mm");
                     }
                     stream.Close();
                 }
@@ -336,7 +341,7 @@ public class SaveGameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Instantiates save game buttons
+    /// Obsolete. Instantiates save game buttons based on how many saves are in files.
     /// </summary>
     public void UpdateSaveGameContent()
     {
@@ -366,7 +371,7 @@ public class SaveGameManager : MonoBehaviour
                     newSaveGameButton = Instantiate(saveGameButtonPrefab, saveGameButtonParent.transform);
                     newSaveGameButton.GetComponent<Button>().onClick.RemoveAllListeners();
                     newSaveGameButton.GetComponent<Button>().onClick.AddListener(() => SelectSaveGame(file.Name, localCopyOfSaveGameCount));
-                    newSaveGameButton.GetComponentInChildren<TMP_Text>().text = file.Name + "\n" + allData.timestamp.ToString("dd/MM/yyyy");
+                    newSaveGameButton.GetComponentInChildren<TMP_Text>().text = file.Name + "\n" + allData.timestamp.ToString("dd/MM/yyyy HH:mm");
                     saveGameButtons.Add(newSaveGameButton);
                 }
 
@@ -376,14 +381,15 @@ public class SaveGameManager : MonoBehaviour
             }
         }
 
-    }
+    } 
 }
 
 [System.Serializable]
 public class SaveData
 {
+    //SaveData saves one objects data.
     public string name;
-    public string displayName; //Since this game uses Finnish or English, or both, Finnish display name should be saved. Prefabs might use English.
+   // public string displayName; //Since this game uses Finnish or English, or both, Finnish display name should be saved. Prefabs might use English.
     public float posX;
     public float posY;
     public float posZ;

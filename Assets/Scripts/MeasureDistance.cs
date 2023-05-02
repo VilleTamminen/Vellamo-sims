@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-//Placing measuring tool pair is buggy because Buildingmanager seeks the object behind first ray hit
-//meaning one of the pair points is hit
-
+//Used by MeasureTool object
 public class MeasureDistance : MonoBehaviour
 {
     //Has a pair of points and calculates distance between them
@@ -67,6 +65,11 @@ public class MeasureDistance : MonoBehaviour
         UpdateLine(point1.position, point2.position);
     }
 
+    /// <summary>
+    /// Updates visual line renderer between 2 points
+    /// </summary>
+    /// <param name="point1"></param>
+    /// <param name="point2"></param>
     private void UpdateLine(Vector3 point1, Vector3 point2)
     {
         line.SetPosition(0, point1);

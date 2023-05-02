@@ -113,6 +113,75 @@ ScriptsOnlyBuild:
     fullTypeName: BuildingManager
     methodName: SelectObject
   - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
+    fullTypeName: BuildingManager
+    methodName: SelectObject
+  - assembly: Assembly-CSharp
     fullTypeName: CameraController
     methodName: ToggleMouseMovement
   - assembly: Assembly-CSharp
@@ -174,6 +243,8 @@ ScriptsOnlyBuild:
     - Class: 65
       Script: {instanceID: 0}
     - Class: 81
+      Script: {instanceID: 0}
+    - Class: 89
       Script: {instanceID: 0}
     - Class: 104
       Script: {instanceID: 0}
@@ -430,7 +501,7 @@ ScriptsOnlyBuild:
     className: ProBuilderShape
   - hash:
       serializedVersion: 2
-      Hash: 21442e3d74184eaf91fe8be247d2317d
+      Hash: a5ae180f8367304346859b39ba11e3d4
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: SelectManager
@@ -1163,5 +1234,5 @@ ScriptsOnlyBuild:
   platform: 19
   scenePathNames:
   - Assets/Scenes/VellamoScene.unity
-  playerPath: C:/GameProjects/Unity projects/Builds/Vellamo sims/Vellamo sims ver0.2/Vellamo
+  playerPath: C:/GameProjects/Unity projects/Builds/Vellamo sims/Vellamo sims ver0.3/Vellamo
     sims.exe

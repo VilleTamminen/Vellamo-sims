@@ -10,6 +10,7 @@ public class CheckBuildablePlacement : MonoBehaviour
     private BuildingManager buildingManager;
     //layers that prevent building placement. 6 = Buildable, 7 = Wall
     public LayerMask[] obstacleLayers = { 6, 7 };
+    //If object has measurepoints, there must be exactly 4 of them.
     public GameObject[] measurePoints = new GameObject[4];
     public bool hasMeasurePoints = false;
 
@@ -27,7 +28,7 @@ public class CheckBuildablePlacement : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (obstacleLayers.Contains(other.gameObject.layer))
+        if (obstacleLayers.Contains(other.gameObject.layer) && SelectManager.Instance.selectedObject == this.gameObject)
         {
             buildingManager.canPlace = false;
         }
@@ -35,12 +36,15 @@ public class CheckBuildablePlacement : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (obstacleLayers.Contains(other.gameObject.layer))
+        if (obstacleLayers.Contains(other.gameObject.layer) && SelectManager.Instance.selectedObject == this.gameObject)
         {
             buildingManager.canPlace = true;
         }
     }
 
+    /// <summary>
+    /// Buildable object can have 4 measurepoints. If object has them, set them to array.
+    /// </summary>
     private void SetMeasurePoints()
     {
         //If measurePoint exists, then set and then hide them. Used by selectManager to visualize distance to other objects.

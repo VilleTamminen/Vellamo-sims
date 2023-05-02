@@ -87,6 +87,7 @@ public class SelectManager : MonoBehaviour
 
     void Update()
     {
+        //We don't want to select object that are behind UI.
         //IsPointerOverGameObject() == false means mouse is not over UI elements
         if (Input.GetMouseButtonDown(0) && EventSystem.current.IsPointerOverGameObject() == false)
         {
@@ -96,7 +97,8 @@ public class SelectManager : MonoBehaviour
             {
                 if (hit.collider.gameObject.layer == 6)
                 {
-                    Select(hit.collider.gameObject.transform.root.gameObject);
+                    //Root object is selected in Select() function if it is not MeasureTool
+                    Select(hit.collider.gameObject);
                 }
             }
         }
@@ -160,6 +162,11 @@ public class SelectManager : MonoBehaviour
         }
 
         selectUI.SetActive(true);
+
+        selectUI.transform.Find("InputFieldX").GetComponent<TMP_InputField>().transform.Find("Text Area").transform.Find("Placeholder").GetComponent<TMP_Text>().text = selectedObject.transform.localScale.x.ToString();
+        selectUI.transform.Find("InputFieldY").GetComponent<TMP_InputField>().transform.Find("Text Area").transform.Find("Placeholder").GetComponent<TMP_Text>().text = selectedObject.transform.localScale.y.ToString();
+        selectUI.transform.Find("InputFieldZ").GetComponent<TMP_InputField>().transform.Find("Text Area").transform.Find("Placeholder").GetComponent<TMP_Text>().text = selectedObject.transform.localScale.z.ToString();
+
     }
 
     public void Deselect()
@@ -261,7 +268,11 @@ public class SelectManager : MonoBehaviour
         MeasureDistance(measurePoints[3].transform, measureLines[3]);
     }
 
-    //Origin is measurePoint position and rayObj is the measureLine object with line renderer and text UI
+    /// <summary>
+    /// Origin is measurePoint position and rayObj is the measureLine object with line renderer and text UI
+    /// </summary>
+    /// <param name="origin"></param>
+    /// <param name="rayObj"></param>
     void MeasureDistance(Transform origin, GameObject rayObj)
     {
         selectUI.transform.Find("InputFieldX").GetComponent<TMP_InputField>().transform.Find("Text Area").transform.Find("Placeholder").GetComponent<TMP_Text>().text = selectedObject.transform.localScale.x.ToString();
@@ -333,6 +344,13 @@ public class SelectManager : MonoBehaviour
         }
 
     }
+
+    /// <summary>
+    /// Unity uses dot as separator, but user might use comma. This turns commas into dots.
+    /// </summary>
+    /// <param name="charToValidate"></param>
+    /// <param name="inputField">This looks like obsolete parameter</param>
+    /// <returns></returns>
     private char ValidateComma(char charToValidate, TMP_InputField inputField)
     {
         //Now input fields accept commas as decimal separators
