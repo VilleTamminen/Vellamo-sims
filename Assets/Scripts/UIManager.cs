@@ -21,7 +21,9 @@ public class UIManager : MonoBehaviour
     public GameObject FloorBlueprint;
 
     public List<GameObject> ObjectButtons;
-    public GameObject contentParent;
+    public GameObject ContentParent; //Content of object panel object buttons
+    public GameObject SearchBar;
+
 
     private void Awake()
     {
@@ -151,30 +153,57 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Fill object buttons with corresponding names from BuildingManager objects array
+    /// Fill object buttons with corresponding names from BuildingManager objects array. Also sets Button onclick event to select object from buildingmanager.
     /// </summary>
     private void FillObjectPanelButtonsInfo()
     {
         //Get child buttons
-        foreach(Transform child in contentParent.transform)
+        foreach(Transform child in ContentParent.transform)
         {
             ObjectButtons.Add(child.gameObject);
         }
         //Assign button info
-        for(int i = 0; i < BuildingManager.Instance.objects.Length; i++)
+        for (int i = 0; i < BuildingManager.Instance.objects.Length - 1; i++)
         {
-            //  ObjectButtons[i].GetComponent<Button>().image = 
+            //Use copy of i so that it uses correct number and not the last value of i
+            int copy = i;
             ObjectButtons[i].GetComponentInChildren<TMP_Text>().text = BuildingManager.Instance.objects[i].name;
             ObjectButtons[i].GetComponentInChildren<TMP_Text>().fontSize = 22;
+            ObjectButtons[i].GetComponent<Button>().onClick.AddListener(delegate
+            {
+                BuildingManager.Instance.SelectObject(copy);
+            });
+        }
+        //Hide unnecessary object buttons
+        if (ObjectButtons.Count > BuildingManager.Instance.objects.Length) {
+            for (int i = ObjectButtons.Count - 1; i >= BuildingManager.Instance.objects.Length; i--)
+            {
+                ObjectButtons[i].SetActive(false);
+            }
         }
     }
 
     /// <summary>
-    /// Sort object names with given prompt
+    /// Search object names in Object Panel by seeing if they contain right word. 
     /// </summary>
     /// <param name="prompt"></param>
-    public void SortObjectPanel(string prompt)
+    public void SearchByName()
     {
+        string searchText = SearchBar.GetComponent<TMP_InputField>().text;
 
+        foreach (GameObject child in ObjectButtons)
+        {
+            if (child.GetComponentInChildren<TMP_Text>().text.Length >= searchText.Length)
+            {
+                if (child.GetComponentInChildren<TMP_Text>().text.ToLower().Contains(searchText))
+                {
+                    child.SetActive(true);
+                }
+                else
+                {
+                    child.SetActive(false);
+                }
+            }
+        }
     }
 }
