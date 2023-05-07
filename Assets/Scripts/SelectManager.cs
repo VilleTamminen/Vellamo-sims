@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-//Bugs: Last selected object's customized scale can affect newly instantiated object scale.
+//Old Bugs: Last selected object's customized scale can affect newly instantiated object scale.
 
 public class SelectManager : MonoBehaviour
 {
